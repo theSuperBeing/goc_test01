@@ -165,10 +165,14 @@
         );
         camera.position.z = 7000;
 
+        socket.emit('init', '');
+
         scene = new THREE.Scene();
 //emit init
-        // table
 
+
+        // table
+/*
         for (var i = 0; i < words.length; i++) {
           var element = document.createElement("div");
           element.className = "element";
@@ -200,7 +204,7 @@
           scene.add(object);
 
           objects.push(object);
-        }
+        }*/
         //
 
         renderer = new CSS3DRenderer();
@@ -227,6 +231,8 @@
         document.addEventListener("keypress", checkKey);
 
         render();
+        
+
       }
       
       function checkKey(e){
@@ -352,6 +358,43 @@
             scene.add(object);
 
             objects.push(object);
+        });
+    
+        socket.on('init', (data) => {
+            console.log(data);
+            for (var i = 0; i < data.message.length; i++) {
+              var element = document.createElement("div");
+              element.className = "element";
+              element.style.backgroundColor = "rgba(0,127,127,0)";
+
+              var textElement = document.createElement("div");
+              textElement.className = "symbol";
+              textElement.textContent = data.message[i];
+              element.appendChild(textElement);
+
+              var object = new CSS3DObject(element);
+              var index = objects.length * 6;
+              object.position.x = pcd[index] * 100;
+              object.position.y = pcd[index + 1] * 100;
+              object.position.z = pcd[index + 2] * 50;
+              var scale = scaleOffset + Math.random() * scaleRange;
+              object.scale.x = scale;
+              object.scale.y = scale;
+              object.scale.z = scale;
+
+              if (pcd[index] < -10) {
+                textElement.style.color = "#547EBF";
+              } else if (pcd[index] < 12) {
+                textElement.style.color = "#DA3434";
+              } else {
+                textElement.style.color = "#EFBF1A";
+              }
+
+              scene.add(object);
+
+              objects.push(object);
+            }
+
         });
 
     

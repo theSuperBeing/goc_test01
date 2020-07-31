@@ -4,11 +4,13 @@ var app = express();
 var path = require('path');
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
-var port = process.env.PORT || 3013;
+var port = process.env.PORT || 3019;
 var fs = require('fs')
-var logger = fs.createWriteStream(path.join(__dirname, 'public/log.txt'), {
+var logger = fs.createWriteStream(path.join(__dirname, 'public/data.csv'), {
   flags: 'a' // 'a' means appending (old data will be preserved)
 })
+var csv = require('fast-csv');
+
 server.listen(port, () => {
   console.log('Server listening at port %d', port);
 });
@@ -31,9 +33,24 @@ io.on('connection', (socket) => {
       message: data
     });
       console.log(data)
-      logger.write(data + ',');
+      logger.write(',' + data);
   });
     
+    
+    socket.on('init', (data) => {
+        let myData ;
+
+        fs.createReadStream(path.join(__dirname, 'public/data.csv'))
+        .pipe(csv.parse({ headers: false }))
+        .on('error', error => console.error(error))
+        .on('data', function(data){  // this function executes once the data has been retrieved
+            socket.emit('init', {
+              message: data
+            });
+        })
+        .on('end', rowCount => console.log(`Parsed ${rowCount} rows`));
+
+    });
     
 
   // when the client emits 'add user', this listens and executes
